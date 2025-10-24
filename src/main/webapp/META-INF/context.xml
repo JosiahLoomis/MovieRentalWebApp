@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context path="/JosiahLoomisMovieRental">
+    <Resource name="jdbc/movierental"
+              auth="Container"
+              driverClassName="com.mysql.cj.jdbc.Driver"
+              url="jdbc:mysql://localhost:3306/movie_rental?useSSL=false&amp;serverTimezone=UTC"
+              username="root"
+              password="sesame"
+              maxTotal="100"
+              maxIdle="30"
+              maxWaitMillis="10000"
+              logAbandoned="true"
+              removeAbandonedOnBorrow="true"
+              removeAbandonedTimeout="60"
+              type="javax.sql.DataSource" />
+</Context>
