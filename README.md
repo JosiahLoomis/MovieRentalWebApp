@@ -1,2 +1,2 @@
 # MovieRentalWebApp 
-This movie rental web app is for educational purposes.
+This movie rental web app was made for educational purposes.
