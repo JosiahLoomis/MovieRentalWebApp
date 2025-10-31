@@ -35,7 +35,7 @@ public class MovieRentalDb {
         }
     }
     
-        // Delete a movie record
+    // Delete a movie record
     public static int deleteMovie(long movieId) {
         ConnectionPool pool = ConnectionPool.getInstance();
         Connection connection = pool.getConnection();
@@ -91,18 +91,73 @@ public class MovieRentalDb {
         }
     }
     
-    // Update movie availability (when rented/returned)
-    public static int updateMovieAvailability(long movieId, int availableCopies, int timesRented) {
+    // Select a movie by ID
+    public static Movie selectMovieById(Long movieId) {
         ConnectionPool pool = ConnectionPool.getInstance();
         Connection connection = pool.getConnection();
         PreparedStatement ps = null;
-        String query = "UPDATE Movie SET availableCopies = ?, timesRented = ? WHERE movieId = ?";
+        ResultSet rs = null;
+        String query = "SELECT * FROM Movie WHERE movieId = ?";
+
         try {
             ps = connection.prepareStatement(query);
-            ps.setInt(1, availableCopies);
-            ps.setInt(2, timesRented);
-            ps.setLong(3, movieId);
-            return ps.executeUpdate();
+            ps.setLong(1, movieId);
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                Movie movie = new Movie(
+                    rs.getLong("movieId"),
+                    rs.getString("title"),
+                    rs.getString("genre"),
+                    rs.getInt("releaseYear"),
+                    rs.getInt("durationInMinutes"),
+                    rs.getString("rating"),
+                    rs.getInt("availableCopies"),
+                    rs.getInt("timesRented")
+                );
+                return movie;
+            } else {
+                return null; // Movie not found
+            }
+        } catch (SQLException e) {
+            System.out.println("SQL Exception in selectMovieById(): " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        } finally {
+            DBUtil.closeResultSet(rs);
+            DBUtil.closePreparedStatement(ps);
+            pool.freeConnection(connection);
+        }
+    }
+    
+    // Update movie availability (when rented/returned)
+    public static int updateMovieAvailability(long movieId, int change, boolean updateTimesRented) {
+        ConnectionPool pool = ConnectionPool.getInstance();
+        Connection connection = pool.getConnection();
+        PreparedStatement ps = null;
+        String query;
+    
+        if (updateTimesRented) {
+            query = "UPDATE Movie " +
+                "SET availableCopies = availableCopies + ?, " +
+                "timesRented = timesRented + 1 " +
+                "WHERE movieId = ?";
+        } else {
+            query = "UPDATE Movie " +
+                "SET availableCopies = availableCopies + ? " +
+                "WHERE movieId = ?";
+        }
+    
+        try {
+            ps = connection.prepareStatement(query);
+            ps.setInt(1, change);
+            ps.setLong(2, movieId);
+
+            int rowsUpdated = ps.executeUpdate();
+            if (rowsUpdated == 0) {
+                throw new SQLException("Movie not found or update failed for movieId: " + movieId);
+            }
+            return rowsUpdated;
         } catch (SQLException e) {
             System.out.println("SQL Exception in updateMovieAvailability(): " + e.getMessage());
             e.printStackTrace();
@@ -364,5 +419,81 @@ public class MovieRentalDb {
             DBUtil.closePreparedStatement(ps);
             pool.freeConnection(connection);
         } 
+    }
+    
+    // Get a rental by rental id
+    public static Rental getRentalById(long rentalId) {
+        ConnectionPool pool = ConnectionPool.getInstance();
+        Connection connection = pool.getConnection();
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        String query = "SELECT r.*, m.* "
+                     + "FROM Rental r "
+                     + "JOIN Movie m ON r.movieId = m.movieId "
+                     + "WHERE r.rentalId = ?";
+        try {
+            ps = connection.prepareStatement(query);
+            ps.setLong(1, rentalId);
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                Movie movie = new Movie(
+                    rs.getLong("movieId"),
+                    rs.getString("title"),
+                    rs.getString("genre"),
+                    rs.getInt("releaseYear"),
+                    rs.getInt("durationInMinutes"),
+                    rs.getString("rating"),
+                    rs.getInt("availableCopies"),
+                    rs.getInt("timesRented")
+                );
+                Rental rental = new Rental(
+                    rs.getLong("rentalId"),
+                    movie,
+                    rs.getLong("userId"),
+                    rs.getDate("rentalDate"),
+                    rs.getDate("dueDate"),
+                    rs.getDate("dateReturned")
+                );
+                return rental;
+            } else {
+                return null; // Rental not found
+            }
+        } catch (SQLException e) {
+            System.out.println("SQL Exception in getRentalById(): " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        } finally {
+            DBUtil.closeResultSet(rs);
+            DBUtil.closePreparedStatement(ps);
+            pool.freeConnection(connection);
+        }
+    }
+    
+    // Set the return date on a rental by id
+    public static int updateReturnDate(long rentalId, java.sql.Date returnDate) {
+        ConnectionPool pool = ConnectionPool.getInstance();
+        Connection connection = pool.getConnection();
+        PreparedStatement ps = null;
+        String query = "UPDATE Rental SET dateReturned = ? WHERE rentalId = ?";
+
+        try {
+            ps = connection.prepareStatement(query);
+            ps.setDate(1, returnDate);
+            ps.setLong(2, rentalId);
+
+            int rowsUpdated = ps.executeUpdate();
+            if (rowsUpdated == 0) {
+                throw new SQLException("Rental not found for rentalId: " + rentalId);
+            }
+            return rowsUpdated;
+        } catch (SQLException e) {
+            System.out.println("SQL Exception in updateReturnDate(): " + e.getMessage());
+            e.printStackTrace();
+            return 0;
+        } finally {
+            DBUtil.closePreparedStatement(ps);
+            pool.freeConnection(connection);
+        }
     }
 }

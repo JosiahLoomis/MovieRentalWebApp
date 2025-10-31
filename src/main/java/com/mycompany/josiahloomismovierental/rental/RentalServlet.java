@@ -17,16 +17,20 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.sql.Date;
+import java.util.Calendar;
 
 //Temp classes will replace with data base later
 @WebServlet(name = "RentalServlet", urlPatterns = {"/index", ""})
 public class RentalServlet extends HttpServlet {
 
+    long UserId = 1;
+    
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
-        getData(request, response, 2);
+        getData(request, response);
         
         request.getRequestDispatcher("/home.jsp").forward(request, response);
     }
@@ -34,10 +38,47 @@ public class RentalServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        
+        String action = request.getParameter("action");
+        String rentalIdStr;
+        int rentalId;
+        
+        switch (action) {
+        case "rent":
+            String movieIdStr = request.getParameter("movieId");
+            int movieId = Integer.parseInt(movieIdStr);
+            rentMovie(movieId);
+            break;
+            
+        case "return":
+            rentalIdStr = request.getParameter("rentalId");
+            rentalId = Integer.parseInt(rentalIdStr);
+            returnMovie(rentalId);
+            break;
+            
+        case "add-coppie":
+            movieIdStr = request.getParameter("movieId");
+            movieId = Integer.parseInt(movieIdStr);
+            addCoppie(movieId);
+            break;
+            
+        case "remove-coppie":
+            movieIdStr = request.getParameter("movieId");
+            movieId = Integer.parseInt(movieIdStr);
+            removeCoppie(movieId);
+            break;
+            
+        case "delete-movie":
+            movieIdStr = request.getParameter("movieId");
+            movieId = Integer.parseInt(movieIdStr);
+            deleteMovie(movieId);
+            break;
+        }
+        
         doGet(request, response);
     }
 
-    void getData(HttpServletRequest request, HttpServletResponse response, long UserId) {
+    void getData(HttpServletRequest request, HttpServletResponse response) {
         
         List<Movie> movies = MovieRentalDb.selectAllMovies();
         request.setAttribute("movies", movies);
@@ -50,5 +91,45 @@ public class RentalServlet extends HttpServlet {
         
         List<Rental> pastRentals = MovieRentalDb.getReturnedRentalsByUser(UserId);
         request.setAttribute("pastRentals", pastRentals);
+    }
+    
+    private void rentMovie(long movieId) {
+        MovieRentalDb.updateMovieAvailability(movieId, -1, true);
+        
+        Movie movie = MovieRentalDb.selectMovieById(movieId);
+        
+        Date today = new Date(System.currentTimeMillis());
+        
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(today);
+        cal.add(Calendar.DAY_OF_MONTH, 14);
+
+        Date dueDate = new Date(cal.getTimeInMillis());
+        
+        Rental rental = new Rental(0, movie, UserId, today, dueDate, null);
+        
+        MovieRentalDb.addRental(rental);
+    }
+    
+    private void returnMovie(long rentalId) {
+        Rental rental = MovieRentalDb.getRentalById(rentalId);
+        
+        MovieRentalDb.updateMovieAvailability(rental.getMovie().getMovieId(), 1, false);
+        
+        Date today = new Date(System.currentTimeMillis());
+        
+        MovieRentalDb.updateReturnDate(rentalId, today);
+    }
+    
+    private void addCoppie(long movieId) {
+        MovieRentalDb.updateMovieAvailability(movieId, 1, false);
+    }
+    
+    private void removeCoppie(long movieId) {
+        MovieRentalDb.updateMovieAvailability(movieId, -1, false);
+    }
+    
+    private void deleteMovie(long movieId) {
+        MovieRentalDb.deleteMovie(movieId);
     }
 }
