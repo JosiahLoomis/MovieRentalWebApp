@@ -10,5 +10,9 @@
         <header>
             <section>
                 <h1>Movie Rental App</h1>
+                <div class="auth-buttons">
+                    <button>Sign In</button>
+                    <button>Sign Out</button>
+                </div>
             </section>
         </header>

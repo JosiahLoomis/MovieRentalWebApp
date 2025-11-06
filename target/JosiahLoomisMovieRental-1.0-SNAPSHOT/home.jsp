@@ -67,10 +67,14 @@
         </div>
     </c:forEach>
 </section> 
-<section>    
-    <h3>Movie Catalog</h3>
-    
-    <button type="submit">Add movie</button>
+<section class="movie-section">    
+    <div style="grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <h3 style="margin: 0;">Movie Catalog</h3>
+        <form action="${pageContext.request.contextPath}/index" method="post" style="margin: 0;">
+            <input type="hidden" name="action" value="add-movie">
+            <button type="submit">Add Movie</button>
+        </form>
+    </div>
     
     <c:forEach var="movie" items="${movies}">
         <div class="movie-card">

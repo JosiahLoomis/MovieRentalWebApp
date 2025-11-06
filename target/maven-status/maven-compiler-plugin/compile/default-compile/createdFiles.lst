@@ -1,8 +1,9 @@
 com\mycompany\josiahloomismovierental\JakartaRestConfiguration.class
+com\mycompany\josiahloomismovierental\servlet\AddMovieServlet.class
+com\mycompany\josiahloomismovierental\servlet\RentalServlet.class
 com\mycompany\josiahloomismovierental\data\ConnectionPool.class
 com\mycompany\josiahloomismovierental\data\MovieRentalDb.class
 com\mycompany\josiahloomismovierental\business\Rental.class
-com\mycompany\josiahloomismovierental\rental\RentalServlet.class
 com\mycompany\josiahloomismovierental\business\Recommendation.class
 com\mycompany\josiahloomismovierental\business\Movie.class
 com\mycompany\josiahloomismovierental\data\DBUtil.class
