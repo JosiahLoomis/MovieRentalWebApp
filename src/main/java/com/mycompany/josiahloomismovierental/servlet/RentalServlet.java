@@ -23,11 +23,15 @@ import java.util.Calendar;
 @WebServlet(name = "RentalServlet", urlPatterns = {"/index", ""})
 public class RentalServlet extends HttpServlet {
 
-    long UserId = 1;
+    long UserId;
     
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        
+        String username = request.getRemoteUser();
+        
+        UserId = MovieRentalDb.getUserIdByUsername(username);
         
         getData(request, response);
         
@@ -55,26 +59,8 @@ public class RentalServlet extends HttpServlet {
             returnMovie(rentalId);
             break;
             
-        case "add-coppie":
-            movieIdStr = request.getParameter("movieId");
-            movieId = Integer.parseInt(movieIdStr);
-            addCoppie(movieId);
-            break;
-            
-        case "remove-coppie":
-            movieIdStr = request.getParameter("movieId");
-            movieId = Integer.parseInt(movieIdStr);
-            removeCoppie(movieId);
-            break;
-            
-        case "delete-movie":
-            movieIdStr = request.getParameter("movieId");
-            movieId = Integer.parseInt(movieIdStr);
-            deleteMovie(movieId);
-            break;
-            
-        case "add-movie":
-            response.sendRedirect(request.getContextPath() + "/add_movie");
+        case "edit-movies":
+            response.sendRedirect(request.getContextPath() + "/edit");
             return;
         }
         
@@ -122,17 +108,5 @@ public class RentalServlet extends HttpServlet {
         Date today = new Date(System.currentTimeMillis());
         
         MovieRentalDb.updateReturnDate(rentalId, today);
-    }
-    
-    private void addCoppie(long movieId) {
-        MovieRentalDb.updateMovieAvailability(movieId, 1, false);
-    }
-    
-    private void removeCoppie(long movieId) {
-        MovieRentalDb.updateMovieAvailability(movieId, -1, false);
-    }
-    
-    private void deleteMovie(long movieId) {
-        MovieRentalDb.deleteMovie(movieId);
     }
 }

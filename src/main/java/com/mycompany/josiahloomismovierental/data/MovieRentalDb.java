@@ -496,4 +496,25 @@ public class MovieRentalDb {
             pool.freeConnection(connection);
         }
     }
+    
+    public static long getUserIdByUsername(String username) {
+    ConnectionPool pool = ConnectionPool.getInstance();
+        Connection connection = pool.getConnection();
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+    String sql = "SELECT userId FROM User WHERE username = ?";
+    try {
+        ps = connection.prepareStatement(sql);
+        
+        ps.setString(1, username);
+        rs = ps.executeQuery();
+        
+        if (rs.next()) {
+            return rs.getLong("userId");
+        }
+    } catch (SQLException e) {
+        System.err.println("Error getting user ID: " + e);
+    }
+        return -1;
+    }
 }

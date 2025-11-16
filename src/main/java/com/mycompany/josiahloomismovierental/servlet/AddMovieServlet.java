@@ -14,14 +14,14 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-@WebServlet(name = "AddMovieServlet", urlPatterns = {"/add_movie"})
+@WebServlet(name = "AddMovieServlet", urlPatterns = {"/edit/add"})
 public class AddMovieServlet extends HttpServlet {
     
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
-        request.getRequestDispatcher("/add_movie.jsp").forward(request, response);
+        request.getRequestDispatcher("/add.jsp").forward(request, response);
     }
     
     @Override
@@ -43,7 +43,7 @@ public class AddMovieServlet extends HttpServlet {
         
         MovieRentalDb.insertMovie(movie);
         
-        response.sendRedirect(request.getContextPath() + "");
+        response.sendRedirect(request.getContextPath() + "/edit");
         return;
     }
 }

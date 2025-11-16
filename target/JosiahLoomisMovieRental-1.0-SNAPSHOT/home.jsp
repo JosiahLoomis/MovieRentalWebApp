@@ -70,10 +70,13 @@
 <section class="movie-section">    
     <div style="grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
         <h3 style="margin: 0;">Movie Catalog</h3>
-        <form action="${pageContext.request.contextPath}/index" method="post" style="margin: 0;">
-            <input type="hidden" name="action" value="add-movie">
-            <button type="submit">Add Movie</button>
-        </form>
+        
+        <c:if test="${pageContext.request.isUserInRole('manager')}">
+            <form action="${pageContext.request.contextPath}/index" method="post" style="margin: 0;">
+                <input type="hidden" name="action" value="edit-movies">
+                <button type="submit">Edit Movies</button>
+            </form>
+        </c:if>
     </div>
     
     <c:forEach var="movie" items="${movies}">
@@ -93,23 +96,6 @@
                     <button type="submit">Rent</button>
                 </form>
             </c:if>
-            
-            <form action="${pageContext.request.contextPath}/index" method="post">
-                <input type="hidden" name="action" value="remove-coppie">
-                <input type="hidden" name="movieId" value="${movie.movieId}">
-                <button type="submit"> - </button>
-            </form>
-            <form action="${pageContext.request.contextPath}/index" method="post">
-                <input type="hidden" name="action" value="add-coppie">
-                <input type="hidden" name="movieId" value="${movie.movieId}">
-                <button type="submit"> + </button>
-            </form>
-            <form action="${pageContext.request.contextPath}/index" method="post">
-                <input type="hidden" name="action" value="delete-movie">
-                <input type="hidden" name="movieId" value="${movie.movieId}">
-                <button type="submit">Delete movie</button>
-            </form>
-                
         </div>
     </c:forEach>
 </section>

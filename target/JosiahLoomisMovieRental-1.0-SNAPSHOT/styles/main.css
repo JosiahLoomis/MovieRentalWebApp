@@ -31,10 +31,18 @@ header section {
     padding: 0;
 }
 
-header h1 {
-    color: white;
-    font-size: 1.8rem;
-    margin: 0;
+header h1 a {
+    color: white !important;
+    text-decoration: none;
+}
+
+header h1 a:hover {
+    text-decoration: none;
+    opacity: 0.9;
+}
+
+header h1 a:visited {
+    color: white !important;
 }
 
 /* Sign in buttons*/

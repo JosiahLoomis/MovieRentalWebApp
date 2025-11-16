@@ -3,9 +3,53 @@
    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
    xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
    version="6.0">
+    
     <session-config>
         <session-timeout>
             30
         </session-timeout>
     </session-config>
+    
+    <security-role>
+        <role-name>user</role-name>
+    </security-role>
+    
+    <security-role>
+        <role-name>manager</role-name>
+    </security-role>
+    
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>Manager Only</web-resource-name>
+            <url-pattern>/edit</url-pattern>
+            <url-pattern>/edit/*</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>manager</role-name>
+        </auth-constraint>
+    </security-constraint>
+    
+    <!-- Protect everything else -->
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>Protected Area</web-resource-name>
+            <url-pattern>/home.jsp</url-pattern>
+            <url-pattern>/index</url-pattern>
+            <url-pattern>/</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>user</role-name>
+            <role-name>manager</role-name>
+        </auth-constraint>
+    </security-constraint>
+    
+    <login-config>
+    <auth-method>FORM</auth-method>
+    <realm-name>MovieRentalRealm</realm-name>
+
+    <form-login-config>
+        <form-login-page>/login.jsp</form-login-page>
+        <form-error-page>/login-error.jsp</form-error-page>
+    </form-login-config>
+</login-config>
 </web-app>

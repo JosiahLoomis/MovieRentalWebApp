@@ -13,4 +13,13 @@
               removeAbandonedOnBorrow="true"
               removeAbandonedTimeout="60"
               type="javax.sql.DataSource" />
+              
+    <Realm className="org.apache.catalina.realm.DataSourceRealm"
+           dataSourceName="jdbc/movierental"
+           localDataSource="true"
+           userTable="User"
+           userNameCol="username"
+           userCredCol="password"
+           userRoleTable="UserRole"
+           roleNameCol="rolename" />
 </Context>

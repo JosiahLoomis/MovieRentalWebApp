@@ -7,4 +7,6 @@ D:\_School\Projects\Java\MovieRentalWebApp\src\main\java\com\mycompany\josiahloo
 D:\_School\Projects\Java\MovieRentalWebApp\src\main\java\com\mycompany\josiahloomismovierental\JakartaRestConfiguration.java
 D:\_School\Projects\Java\MovieRentalWebApp\src\main\java\com\mycompany\josiahloomismovierental\resources\JakartaEE11Resource.java
 D:\_School\Projects\Java\MovieRentalWebApp\src\main\java\com\mycompany\josiahloomismovierental\servlet\AddMovieServlet.java
+D:\_School\Projects\Java\MovieRentalWebApp\src\main\java\com\mycompany\josiahloomismovierental\servlet\EditServlet.java
+D:\_School\Projects\Java\MovieRentalWebApp\src\main\java\com\mycompany\josiahloomismovierental\servlet\LogoutServlet.java
 D:\_School\Projects\Java\MovieRentalWebApp\src\main\java\com\mycompany\josiahloomismovierental\servlet\RentalServlet.java

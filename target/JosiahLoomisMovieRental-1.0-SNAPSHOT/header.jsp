@@ -9,10 +9,13 @@
     <body>
         <header>
             <section>
-                <h1>Movie Rental App</h1>
-                <div class="auth-buttons">
-                    <button>Sign In</button>
-                    <button>Sign Out</button>
-                </div>
+                <h1><a href="${pageContext.request.contextPath}/">Movie Rental App</a></h1>
+                <c:if test="${pageContext.request.userPrincipal != null}">
+                    <div class="auth-buttons">
+                        <a href="${pageContext.request.contextPath}/logout">
+                            <button type="button">Sign Out</button>
+                        </a>
+                    </div>
+                </c:if>
             </section>
         </header>
