@@ -20,8 +20,6 @@ import java.util.Calendar;
 
 @WebServlet(name = "EditServlet", urlPatterns = {"/edit"})
 public class EditServlet extends HttpServlet {
-
-    long UserId = 1;
     
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)

@@ -16,22 +16,25 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.util.List;
 import java.sql.Date;
 import java.util.Calendar;
 
 @WebServlet(name = "RentalServlet", urlPatterns = {"/index", ""})
 public class RentalServlet extends HttpServlet {
-
-    long UserId;
     
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
-        String username = request.getRemoteUser();
-        
-        UserId = MovieRentalDb.getUserIdByUsername(username);
+        Long userId = (Long) request.getSession().getAttribute("userId");
+        if (userId == null) {
+            HttpSession session = request.getSession();
+            String username = request.getRemoteUser();
+            long UserId = MovieRentalDb.getUserIdByUsername(username);
+            session.setAttribute("userId", UserId);
+        }
         
         getData(request, response);
         
@@ -50,7 +53,7 @@ public class RentalServlet extends HttpServlet {
         case "rent":
             String movieIdStr = request.getParameter("movieId");
             int movieId = Integer.parseInt(movieIdStr);
-            rentMovie(movieId);
+            rentMovie(request, movieId);
             break;
             
         case "return":
@@ -68,21 +71,24 @@ public class RentalServlet extends HttpServlet {
     }
 
     void getData(HttpServletRequest request, HttpServletResponse response) {
+        Long userId = (Long) request.getSession().getAttribute("userId");
         
         List<Movie> movies = MovieRentalDb.selectAllMovies();
         request.setAttribute("movies", movies);
         
-        List<Recommendation> recommendations = MovieRentalDb.getRecommendationsByUserId(UserId);
+        List<Recommendation> recommendations = MovieRentalDb.getRecommendationsByUserId(userId);
         request.setAttribute("recommendations", recommendations);
         
-        List<Rental> curRentals = MovieRentalDb.getActiveRentalsByUser(UserId);
+        List<Rental> curRentals = MovieRentalDb.getActiveRentalsByUser(userId);
         request.setAttribute("curRentals", curRentals);
         
-        List<Rental> pastRentals = MovieRentalDb.getReturnedRentalsByUser(UserId);
+        List<Rental> pastRentals = MovieRentalDb.getReturnedRentalsByUser(userId);
         request.setAttribute("pastRentals", pastRentals);
     }
     
-    private void rentMovie(long movieId) {
+    private void rentMovie(HttpServletRequest request, long movieId) {
+        Long userId = (Long) request.getSession().getAttribute("userId");
+        
         MovieRentalDb.updateMovieAvailability(movieId, -1, true);
         
         Movie movie = MovieRentalDb.selectMovieById(movieId);
@@ -95,7 +101,7 @@ public class RentalServlet extends HttpServlet {
 
         Date dueDate = new Date(cal.getTimeInMillis());
         
-        Rental rental = new Rental(0, movie, UserId, today, dueDate, null);
+        Rental rental = new Rental(0, movie, userId, today, dueDate, null);
         
         MovieRentalDb.addRental(rental);
     }
