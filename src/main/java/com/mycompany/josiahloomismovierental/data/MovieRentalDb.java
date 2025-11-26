@@ -167,48 +167,6 @@ public class MovieRentalDb {
             pool.freeConnection(connection);
         }
     }
-    
-    // Insert a new recommendation
-    public static int addRecommendation(Recommendation recommendation) {
-        ConnectionPool pool = ConnectionPool.getInstance();
-        Connection connection = pool.getConnection();
-        PreparedStatement ps = null;
-        String query = "INSERT INTO Recommendation (movieId, userId, reason) VALUES (?, ?, ?)";
-        try {
-            ps = connection.prepareStatement(query);
-            ps.setLong(1, recommendation.getMovie().getMovieId());
-            ps.setLong(2, recommendation.getUserId());
-            ps.setString(3, recommendation.getReason());
-            return ps.executeUpdate();
-        } catch (SQLException e) {
-            System.out.println("SQL Exception in addRecommendation(): " + e.getMessage());
-            e.printStackTrace();
-            return 0;
-        } finally {
-            DBUtil.closePreparedStatement(ps);
-            pool.freeConnection(connection);
-        }
-    }
-
-    // Delete a rental recommendation
-    public static int deleteRecommendation(long recommendationId) {
-        ConnectionPool pool = ConnectionPool.getInstance();
-        Connection connection = pool.getConnection();
-        PreparedStatement ps = null;
-        String query = "DELETE FROM Recommendation WHERE recommendationId = ?";
-        try {
-            ps = connection.prepareStatement(query);
-            ps.setLong(1, recommendationId);
-            return ps.executeUpdate();
-        } catch (SQLException e) {
-            System.out.println("SQL Exception in deleteRecommendation(): " + e.getMessage());
-            e.printStackTrace();
-            return 0;
-        } finally {
-            DBUtil.closePreparedStatement(ps);
-            pool.freeConnection(connection);
-        }
-    }
 
     // Get all recommendations by user 
     public static List<Recommendation> getRecommendationsByUserId(long userId) {
@@ -217,45 +175,128 @@ public class MovieRentalDb {
         PreparedStatement ps = null;
         ResultSet rs = null;
 
-        String query = "SELECT r.recommendationId, r.movieId, r.userId, r.reason, "
-                     + "m.title, m.genre, m.releaseYear, m.durationInMinutes, m.rating, "
-                     + "m.availableCopies, m.timesRented "
-                     + "FROM Recommendation r "
-                     + "JOIN Movie m ON r.movieId = m.movieId "
-                     + "WHERE r.userId = ?";
-
         try {
-            ps = connection.prepareStatement(query);
+            // Step 1: Find the most common genre from user's rental history
+            String genreQuery = "SELECT m.genre, COUNT(*) as genreCount " +
+                              "FROM Rental ren " +
+                              "JOIN Movie m ON ren.movieId = m.movieId " +
+                              "WHERE ren.userId = ? " +
+                              "GROUP BY m.genre " +
+                              "ORDER BY genreCount DESC " +
+                              "LIMIT 1";
+
+            ps = connection.prepareStatement(genreQuery);
             ps.setLong(1, userId);
             rs = ps.executeQuery();
 
+            String favoriteGenre = null;
+            if (rs.next()) {
+                favoriteGenre = rs.getString("genre");
+            }
+            DBUtil.closeResultSet(rs);
+            DBUtil.closePreparedStatement(ps);
+
+            List<Movie> recommendedMovies = new ArrayList<>();
+
+            if (favoriteGenre != null) {
+                // Step 2: Get up to 3 movies in that genre that the user hasn't rented
+                String movieQuery = "SELECT m.movieId, m.title, m.genre, m.releaseYear, " +
+                                  "m.durationInMinutes, m.rating, m.availableCopies, m.timesRented " +
+                                  "FROM Movie m " +
+                                  "WHERE m.genre = ? " +
+                                  "AND m.movieId NOT IN (" +
+                                  "    SELECT movieId FROM Rental WHERE userId = ?" +
+                                  ") " +
+                                  "ORDER BY m.timesRented DESC " +
+                                  "LIMIT 3";
+
+                ps = connection.prepareStatement(movieQuery);
+                ps.setString(1, favoriteGenre);
+                ps.setLong(2, userId);
+                rs = ps.executeQuery();
+
+                while (rs.next()) {
+                    Movie movie = new Movie(
+                        rs.getLong("movieId"),
+                        rs.getString("title"),
+                        rs.getString("genre"),
+                        rs.getInt("releaseYear"),
+                        rs.getInt("durationInMinutes"),
+                        rs.getString("rating"),
+                        rs.getInt("availableCopies"),
+                        rs.getInt("timesRented")
+                    );
+                    recommendedMovies.add(movie);
+                }
+                DBUtil.closeResultSet(rs);
+                DBUtil.closePreparedStatement(ps);
+            }
+
+            // Step 3: If we don't have 3 movies yet, fill with random unrented movies
+            if (recommendedMovies.size() < 3) {
+                int needed = 3 - recommendedMovies.size();
+
+                String randomQuery = "SELECT m.movieId, m.title, m.genre, m.releaseYear, " +
+                                   "m.durationInMinutes, m.rating, m.availableCopies, m.timesRented " +
+                                   "FROM Movie m " +
+                                   "WHERE m.movieId NOT IN (" +
+                                   "    SELECT movieId FROM Rental WHERE userId = ?" +
+                                   ") ";
+
+                // Exclude already recommended movies
+                if (!recommendedMovies.isEmpty()) {
+                    randomQuery += "AND m.movieId NOT IN (" +
+                                 recommendedMovies.stream()
+                                     .map(m -> String.valueOf(m.getMovieId()))
+                                     .collect(java.util.stream.Collectors.joining(",")) +
+                                 ") ";
+                }
+
+                randomQuery += "ORDER BY RAND() LIMIT ?";
+
+                ps = connection.prepareStatement(randomQuery);
+                ps.setLong(1, userId);
+                ps.setInt(2, needed);
+                rs = ps.executeQuery();
+
+                while (rs.next()) {
+                    Movie movie = new Movie(
+                        rs.getLong("movieId"),
+                        rs.getString("title"),
+                        rs.getString("genre"),
+                        rs.getInt("releaseYear"),
+                        rs.getInt("durationInMinutes"),
+                        rs.getString("rating"),
+                        rs.getInt("availableCopies"),
+                        rs.getInt("timesRented")
+                    );
+                    recommendedMovies.add(movie);
+                }
+            }
+
+            // Step 4: Convert Movie list to Recommendation list
             List<Recommendation> recommendations = new ArrayList<>();
 
-            while (rs.next()) {
-                // Create the Movie object with all its data
-                Movie movie = new Movie(
-                    rs.getLong("movieId"),
-                    rs.getString("title"),
-                    rs.getString("genre"),
-                    rs.getInt("releaseYear"),
-                    rs.getInt("durationInMinutes"),
-                    rs.getString("rating"),
-                    rs.getInt("availableCopies"),
-                    rs.getInt("timesRented")
-                );
+            for (Movie movie : recommendedMovies) {
+                // Give each movie a personalized reason based on whether it matches favorite genre
+                String reason;
+                if (favoriteGenre != null && movie.getGenre().equalsIgnoreCase(favoriteGenre)) {
+                    reason = "Based on your love of " + favoriteGenre + " movies";
+                } else {
+                    reason = "Popular movie you might enjoy";
+                }
 
-                // Create Recommendation object with the Movie inside
                 Recommendation rec = new Recommendation(
-                    rs.getLong("recommendationId"),
+                    0L, // recommendationId can be 0 for dynamic recommendations
                     movie,
-                    rs.getLong("userId"),
-                    rs.getString("reason")
+                    userId,
+                    reason
                 );
-
                 recommendations.add(rec);
             }
 
             return recommendations;
+
         } catch (SQLException e) {
             System.out.println("SQL Exception in getRecommendationsByUserId(): " + e.getMessage());
             e.printStackTrace();

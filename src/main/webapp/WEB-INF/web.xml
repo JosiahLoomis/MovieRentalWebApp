@@ -18,16 +18,26 @@
         <role-name>manager</role-name>
     </security-role>
     
+    <!-- FIRST: Explicitly allow static resources with NO auth -->
     <security-constraint>
         <web-resource-collection>
-            <web-resource-name>Static Resources</web-resource-name>
-            <url-pattern>/css/*</url-pattern>
-            <url-pattern>/js/*</url-pattern>
-            <url-pattern>/images/*</url-pattern>
+            <web-resource-name>Public Static Files</web-resource-name>
+            <url-pattern>/styles/*</url-pattern>
         </web-resource-collection>
-        <auth-constraint />
+        <!-- Empty auth-constraint means NO authentication required -->
     </security-constraint>
-    
+
+    <!-- SECOND: Allow login pages -->
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>Login Pages</web-resource-name>
+            <url-pattern>/login.jsp</url-pattern>
+            <url-pattern>/login-error.jsp</url-pattern>
+        </web-resource-collection>
+        <!-- No auth-constraint = accessible to all -->
+    </security-constraint>
+
+    <!-- THIRD: Manager-only pages -->
     <security-constraint>
         <web-resource-collection>
             <web-resource-name>Manager Only</web-resource-name>
@@ -38,11 +48,11 @@
             <role-name>manager</role-name>
         </auth-constraint>
     </security-constraint>
-    
-    <!-- Protect everything else -->
+
+    <!-- FOURTH: User pages -->
     <security-constraint>
         <web-resource-collection>
-            <web-resource-name>Protected Area</web-resource-name>
+            <web-resource-name>User Pages</web-resource-name>
             <url-pattern>/home.jsp</url-pattern>
             <url-pattern>/index</url-pattern>
             <url-pattern>/</url-pattern>
