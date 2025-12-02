@@ -1,17 +1,17 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.josiahloomismovierental.business;
 
 import java.sql.Date;
 /**
- *
- * @author Imagine
+ * Class that represents a movie rental having a reference to a movie, a reference to a person, and variables for rental, due, and returned date.
+ * 
+ * @author Josiah Loomis
+ * Date: November 27, 2024
+ * Course: Java II
+ * Final Project - Movie Rental Web App
  */
 public class Rental {
     private long rentalId;
-    private Movie movie;        // store the actual Movie object
+    private Movie movie;        
     private long userId;
     private Date rentalDate;
     private Date dueDate;

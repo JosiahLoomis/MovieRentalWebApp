@@ -18,6 +18,14 @@ import java.util.List;
 import java.sql.Date;
 import java.util.Calendar;
 
+/**
+ * Servlet for the edit.jsp which allows managers to add, delete, and modify movie inventory.
+ * 
+ * @author Josiah Loomis
+ * Date: November 27, 2024
+ * Course: Java II
+ * Final Project - Movie Rental Web App
+ */
 @WebServlet(name = "EditServlet", urlPatterns = {"/edit"})
 public class EditServlet extends HttpServlet {
     
@@ -67,20 +75,24 @@ public class EditServlet extends HttpServlet {
         doGet(request, response);
     }
 
+    //Gets all the data to be displayed
     void getData(HttpServletRequest request, HttpServletResponse response) {
         
         List<Movie> movies = MovieRentalDb.selectAllMovies();
         request.setAttribute("movies", movies);
     }
     
+    //Adds a copy to a movie
     private void addCoppie(long movieId) {
         MovieRentalDb.updateMovieAvailability(movieId, 1, false);
     }
     
+    //Removes a copy to a movie
     private void removeCoppie(long movieId) {
         MovieRentalDb.updateMovieAvailability(movieId, -1, false);
     }
     
+    //Deletes a movie from the database
     private void deleteMovie(long movieId) {
         MovieRentalDb.deleteMovie(movieId);
     }

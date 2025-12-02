@@ -19,9 +19,16 @@ CREATE TABLE User (
     firstName VARCHAR(100) NOT NULL,
     lastName VARCHAR(100) NOT NULL,
     email VARCHAR(150) NOT NULL UNIQUE,
+    username VARCHAR(50) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY(userId)
+);
+
+CREATE TABLE UserRole (
+    username VARCHAR(50) NOT NULL,
+    rolename VARCHAR(50) NOT NULL,
+    PRIMARY KEY(username, rolename)
 );
 
 CREATE TABLE Rental (
@@ -36,16 +43,6 @@ CREATE TABLE Rental (
     FOREIGN KEY (userId) REFERENCES User(userId) ON DELETE CASCADE,
     INDEX idx_user_rental (userId),
     INDEX idx_movie_rental (movieId)
-);
-
-CREATE TABLE Recommendation (
-    recommendationId BIGINT NOT NULL AUTO_INCREMENT,
-    movieId BIGINT NOT NULL,
-    userId BIGINT NOT NULL,
-    reason VARCHAR(255),
-    PRIMARY KEY(recommendationId),
-    FOREIGN KEY (movieId) REFERENCES Movie(movieId) ON DELETE CASCADE,
-    FOREIGN KEY (userId) REFERENCES User(userId) ON DELETE CASCADE
 );
 
 INSERT INTO Movie (title, genre, releaseYear, durationInMinutes, rating, availableCopies, timesRented)
@@ -97,18 +94,30 @@ VALUES
     
 -- Insert Users (Note: passwords should be bcrypt hashed in real application)
 -- These are placeholder passwords - in production use bcrypt!
-INSERT INTO User (firstName, lastName, email, password)
+INSERT INTO User (firstName, lastName, email, username, password)
 VALUES 
-    ('John', 'Smith', 'john.smith@email.com', '$2a$10$abcdefghijklmnopqrstuvwxyz123456789'),
-    ('Sarah', 'Johnson', 'sarah.j@email.com', '$2a$10$abcdefghijklmnopqrstuvwxyz123456789'),
-    ('Michael', 'Williams', 'mike.w@email.com', '$2a$10$abcdefghijklmnopqrstuvwxyz123456789'),
-    ('Emily', 'Brown', 'emily.brown@email.com', '$2a$10$abcdefghijklmnopqrstuvwxyz123456789'),
-    ('David', 'Miller', 'david.miller@email.com', '$2a$10$abcdefghijklmnopqrstuvwxyz123456789'),
-    ('Jessica', 'Davis', 'jess.davis@email.com', '$2a$10$abcdefghijklmnopqrstuvwxyz123456789'),
-    ('James', 'Garcia', 'james.g@email.com', '$2a$10$abcdefghijklmnopqrstuvwxyz123456789'),
-    ('Ashley', 'Rodriguez', 'ashley.r@email.com', '$2a$10$abcdefghijklmnopqrstuvwxyz123456789'),
-    ('Christopher', 'Martinez', 'chris.m@email.com', '$2a$10$abcdefghijklmnopqrstuvwxyz123456789'),
-    ('Amanda', 'Wilson', 'amanda.w@email.com', '$2a$10$abcdefghijklmnopqrstuvwxyz123456789');
+    ('John', 'Smith', 'john.smith@email.com', 'smith', '1234'),
+    ('Sarah', 'Johnson', 'sarah.j@email.com', 'john', '1234'),
+    ('Mike', 'Davis', 'mike.d@email.com', 'mike', '1234'),
+    ('Emily', 'Wilson', 'emily.w@email.com', 'emily', '1234'),
+    ('David', 'Brown', 'david.b@email.com', 'david', '1234'),
+    ('Lisa', 'Taylor', 'lisa.t@email.com', 'lisa', '1234'),
+    ('James', 'Anderson', 'james.a@email.com', 'james', '1234'),
+    ('Maria', 'Martinez', 'maria.m@email.com', 'maria', '1234'),
+    ('Robert', 'Garcia', 'robert.g@email.com', 'robert', '1234'),
+    ('Jennifer', 'Rodriguez', 'jennifer.r@email.com', 'jennifer', '1234');
+    
+INSERT INTO UserRole (username, rolename) VALUES
+('smith', 'manager'),
+('john', 'user'),
+('mike', 'user'),
+('emily', 'user'),
+('david', 'user'),
+('lisa', 'user'),
+('james', 'user'),
+('maria', 'user'),
+('robert', 'user'),
+('jennifer', 'user');
 
 -- Insert Active Rentals (movies currently checked out)
 INSERT INTO Rental (movieId, userId, rentalDate, dueDate, dateReturned)
@@ -133,26 +142,3 @@ VALUES
     (19, 10, '2025-08-20', '2025-09-09', '2025-09-07'),
     (24, 1, '2025-07-12', '2025-08-01', '2025-07-30'),
     (6, 4, '2025-07-18', '2025-08-07', '2025-08-05');
-
--- Insert Recommendations (personalized movie suggestions)
-INSERT INTO Recommendation (movieId, userId, reason)
-VALUES 
-    -- Based on viewing history
-    (9, 1, 'Because you enjoyed The Shawshank Redemption'),
-    (3, 1, 'Similar drama to your recent rentals'),
-    (26, 1, 'Poular Action Movie'),
-    (24, 2, 'Fans of Inception often love this'),
-    (10, 2, 'Another mind-bending sci-fi masterpiece'),
-    (8, 3, 'Since you liked The Dark Knight'),
-    (20, 3, 'Highly rated thriller you might enjoy'),
-    (15, 4, 'Top horror pick for this month'),
-    (16, 4, 'Trending in horror genre'),
-    (23, 5, 'Perfect family-friendly animation'),
-    (21, 5, 'Oscar-winning animation classic'),
-    
-    -- Genre-based recommendations
-    (7, 6, 'Top-rated sci-fi film'),
-    (12, 7, 'Critics choice for comedy'),
-    (18, 8, 'Romantic drama you will love'),
-    (25, 9, 'Epic fantasy adventure'),
-    (4, 10, 'Must-see action blockbuster');

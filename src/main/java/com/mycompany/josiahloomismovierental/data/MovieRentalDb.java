@@ -7,6 +7,14 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class that holds all the functions for getting and setting the data in the database.
+ * 
+ * @author Josiah Loomis
+ * Date: November 27, 2024
+ * Course: Java II
+ * Final Project - Movie Rental Web App
+ */
 public class MovieRentalDb {
     
     // Insert a new movie
@@ -168,7 +176,7 @@ public class MovieRentalDb {
         }
     }
 
-    // Get all recommendations by user 
+    // Get all recommendations for a user 
     public static List<Recommendation> getRecommendationsByUserId(long userId) {
         ConnectionPool pool = ConnectionPool.getInstance();
         Connection connection = pool.getConnection();
@@ -176,7 +184,6 @@ public class MovieRentalDb {
         ResultSet rs = null;
 
         try {
-            // Step 1: Find the most common genre from user's rental history
             String genreQuery = "SELECT m.genre, COUNT(*) as genreCount " +
                               "FROM Rental ren " +
                               "JOIN Movie m ON ren.movieId = m.movieId " +
@@ -199,7 +206,6 @@ public class MovieRentalDb {
             List<Movie> recommendedMovies = new ArrayList<>();
 
             if (favoriteGenre != null) {
-                // Step 2: Get up to 3 movies in that genre that the user hasn't rented
                 String movieQuery = "SELECT m.movieId, m.title, m.genre, m.releaseYear, " +
                                   "m.durationInMinutes, m.rating, m.availableCopies, m.timesRented " +
                                   "FROM Movie m " +
@@ -232,7 +238,6 @@ public class MovieRentalDb {
                 DBUtil.closePreparedStatement(ps);
             }
 
-            // Step 3: If we don't have 3 movies yet, fill with random unrented movies
             if (recommendedMovies.size() < 3) {
                 int needed = 3 - recommendedMovies.size();
 
@@ -274,11 +279,9 @@ public class MovieRentalDb {
                 }
             }
 
-            // Step 4: Convert Movie list to Recommendation list
             List<Recommendation> recommendations = new ArrayList<>();
 
             for (Movie movie : recommendedMovies) {
-                // Give each movie a personalized reason based on whether it matches favorite genre
                 String reason;
                 if (favoriteGenre != null && movie.getGenre().equalsIgnoreCase(favoriteGenre)) {
                     reason = "Based on your love of " + favoriteGenre + " movies";
@@ -287,7 +290,7 @@ public class MovieRentalDb {
                 }
 
                 Recommendation rec = new Recommendation(
-                    0L, // recommendationId can be 0 for dynamic recommendations
+                    0L,
                     movie,
                     userId,
                     reason
@@ -538,6 +541,7 @@ public class MovieRentalDb {
         }
     }
     
+    // Gets a users id based on the users username
     public static long getUserIdByUsername(String username) {
     ConnectionPool pool = ConnectionPool.getInstance();
         Connection connection = pool.getConnection();

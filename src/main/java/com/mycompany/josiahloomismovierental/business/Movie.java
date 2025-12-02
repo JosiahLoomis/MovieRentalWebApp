@@ -1,12 +1,12 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.josiahloomismovierental.business;
 
 /**
- *
- * @author Imagine
+ * Class that represents a movie with all its attributes.
+ * 
+ * @author Josiah Loomis
+ * Date: November 27, 2024
+ * Course: Java II
+ * Final Project - Movie Rental Web App
  */
 public class Movie {
     private long movieId;

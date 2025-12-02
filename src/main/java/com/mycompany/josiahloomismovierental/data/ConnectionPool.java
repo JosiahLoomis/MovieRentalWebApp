@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.josiahloomismovierental.data;
 
 import java.sql.*;
@@ -9,6 +5,14 @@ import javax.sql.DataSource;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
+/**
+ * Class that manages database connections using connection pooling.
+ * 
+ * @author Josiah Loomis
+ * Date: November 27, 2024
+ * Course: Java II
+ * Final Project - Movie Rental Web App
+ */
 public class ConnectionPool {
     private static ConnectionPool pool = null;
     private static DataSource dataSource = null;
@@ -46,3 +50,4 @@ public class ConnectionPool {
         }
     }
 }
+

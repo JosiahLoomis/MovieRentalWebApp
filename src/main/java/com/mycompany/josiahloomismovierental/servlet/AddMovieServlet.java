@@ -14,6 +14,14 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+/**
+ * Servlet for the add.jsp which is responsible for adding new movies to the database.
+ * 
+ * @author Josiah Loomis
+ * Date: November 27, 2024
+ * Course: Java II
+ * Final Project - Movie Rental Web App
+ */
 @WebServlet(name = "AddMovieServlet", urlPatterns = {"/edit/add"})
 public class AddMovieServlet extends HttpServlet {
     

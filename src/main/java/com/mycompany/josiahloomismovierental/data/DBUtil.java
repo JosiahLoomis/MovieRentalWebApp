@@ -2,6 +2,14 @@ package com.mycompany.josiahloomismovierental.data;
 
 import java.sql.*;
 
+/**
+ * Class that provides helper methods for safely closing database resources.
+ * 
+ * @author Josiah Loomis
+ * Date: November 27, 2024
+ * Course: Java II
+ * Final Project - Movie Rental Web App
+ */
 public class DBUtil {
 
     public static void closeStatement(Statement s) {

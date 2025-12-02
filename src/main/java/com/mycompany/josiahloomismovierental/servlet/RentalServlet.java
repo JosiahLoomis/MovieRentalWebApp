@@ -21,6 +21,15 @@ import java.util.List;
 import java.sql.Date;
 import java.util.Calendar;
 
+/**
+ * Servlet for the home.jsp which is responsible for showing the users current rentals, past rentals, 
+ * and movies for rent its also responsible for renting and returning movies.
+ * 
+ * @author Josiah Loomis
+ * Date: November 27, 2024
+ * Course: Java II
+ * Final Project - Movie Rental Web App
+ */
 @WebServlet(name = "RentalServlet", urlPatterns = {"/index", ""})
 public class RentalServlet extends HttpServlet {
     
@@ -70,6 +79,7 @@ public class RentalServlet extends HttpServlet {
         doGet(request, response);
     }
 
+    //Gets all the data to be displayed
     void getData(HttpServletRequest request, HttpServletResponse response) {
         Long userId = (Long) request.getSession().getAttribute("userId");
         
@@ -86,6 +96,7 @@ public class RentalServlet extends HttpServlet {
         request.setAttribute("pastRentals", pastRentals);
     }
     
+    //Rents a movie
     private void rentMovie(HttpServletRequest request, long movieId) {
         Long userId = (Long) request.getSession().getAttribute("userId");
         
@@ -106,6 +117,7 @@ public class RentalServlet extends HttpServlet {
         MovieRentalDb.addRental(rental);
     }
     
+    //Returns a movie
     private void returnMovie(long rentalId) {
         Rental rental = MovieRentalDb.getRentalById(rentalId);
         
